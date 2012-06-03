@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+	<title>Language Canvas</title>
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="codemirror/theme/lesser-dark.css">
+    <style type="text/css">
+	    html, body { height: 100%; }
+	    body { margin: 1em; }
+	    form {
+	    	height: 47%;
+	    	margin-bottom: 1em;
+	    }
+
+	    .CodeMirror,
+	    .CodeMirror-scroll {
+	    	height: 100%;
+	    }
+	    .CodeMirror {
+	    }
+    </style>
+    <script src="codemirror/lib/codemirror.js"></script>
+    <script src="codemirror/mode/flexible/flexible.js"></script>
+    <script src="codemirror/mode/javascript/javascript.js"></script>
+    <script src="codemirror/mode/css/css.js"></script>
+</head>
+<body>
+	<form><textarea id="code"></textarea></form>
+	<form><textarea id="parser"></textarea></form>
+</body>
+<script>
+var Syntax = [];
+
+var parser = CodeMirror.fromTextArea(document.getElementById("parser"), {
+	theme:"lesser-dark",
+	mode:"text/javascript",
+	smartIndent:false,
+	onChange:function() {
+		Syntax = [];
+		var syntaxLines = parser.getValue().split("\n");
+		for (var i = syntaxLines.length - 1; i >= 0; i--) {
+			try {
+				var arr = eval( "[" +  syntaxLines[i] + "]" );
+				if(arr.length == 2 && arr[0] != "") Syntax.push(arr);
+			} catch(e) {}
+		}
+
+		editor.setOption("mode", editor.getOption("mode"));
+		localStorage.setItem("parserText", parser.getValue());
+	}
+});
+
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+	theme:"lesser-dark",
+	mode:"text/flexible",
+	lineNumbers: true,
+	onChange:function() {
+		localStorage.setItem("editorText", editor.getValue());
+	}
+});
+
+document.body.onload = function() {
+	editor.setValue(localStorage.getItem("editorText"));
+	parser.setValue(localStorage.getItem("parserText"));
+
+	editor.setOption("mode", editor.getOption("mode"));
+};
+
+</script>
+</html>
