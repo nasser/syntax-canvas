@@ -21,6 +21,7 @@
     </style>
     <script src="codemirror/lib/codemirror.js"></script>
     <script src="codemirror/mode/flexible/flexible.js"></script>
+    <script src="codemirror/mode/slymtax/slymtax.js"></script>
     <script src="codemirror/mode/javascript/javascript.js"></script>
     <script src="codemirror/mode/css/css.js"></script>
 </head>
@@ -29,24 +30,46 @@
 	<form><textarea id="parser"></textarea></form>
 </body>
 <script>
+RegExp.prototype.toString = function() {
+	if(typeof this.source == 'undefined')
+		return "";
+	else
+		return this.source;
+}
+
 var Syntax = [];
 
 var parser = CodeMirror.fromTextArea(document.getElementById("parser"), {
 	theme:"lesser-dark",
-	mode:"text/javascript",
+	mode:"text/slymtax",
 	smartIndent:false,
 	onChange:function() {
 		Syntax = [];
 		var syntaxLines = parser.getValue().split("\n");
 		for (var i = syntaxLines.length - 1; i >= 0; i--) {
 			try {
-				var arr = eval( "[" +  syntaxLines[i] + "]" );
-				if(arr.length == 2 && arr[0] != "") Syntax.push(arr);
+				var matches, token, styles;
+				if(matches = /\/([^\/]+)\/\s*:\s*(.+)/.exec(syntaxLines[i])) {
+					// regexp rule
+					token = new RegExp("^" + matches[1].trim().replace(/ /g, "")); // whitespace replace, bad idea?
+					styles = matches[2].trim().split(" ");
+					
+				} else if(matches = /'([^']+)'\s*:\s*(.+)/.exec(syntaxLines[i])) {
+					// string rule
+					token = matches[1].trim();
+					styles = matches[2].trim().split(" ");
+
+				} else {
+					continue;
+
+				}
+				
+				if(typeof styles != "undefined" && typeof token != "undefined") Syntax.push([token, styles]);
+
 			} catch(e) {}
 		}
 
 		editor.setOption("mode", editor.getOption("mode"));
-		localStorage.setItem("parserText", parser.getValue());
 	}
 });
 
@@ -54,7 +77,8 @@ var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
 	theme:"lesser-dark",
 	mode:"text/flexible",
 	lineNumbers: true,
-	onChange:function() {
+	onHighlightComplete:function() {
+		localStorage.setItem("parserText", parser.getValue());
 		localStorage.setItem("editorText", editor.getValue());
 	}
 });
