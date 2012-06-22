@@ -3,7 +3,7 @@
 <head>
 	<title>Language Canvas</title>
     <link rel="stylesheet" href="codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="codemirror/theme/lesser-dark.css">
+    <link rel="stylesheet" href="codemirror/theme/ambiance.css">
     <style type="text/css">
 	    html, body { height: 100%; }
 	    body { margin: 1em; }
@@ -40,7 +40,7 @@ RegExp.prototype.toString = function() {
 var Syntax = [];
 
 var parser = CodeMirror.fromTextArea(document.getElementById("parser"), {
-	theme:"lesser-dark",
+	theme:"ambiance",
 	mode:"text/slymtax",
 	smartIndent:false,
 	onChange:function() {
@@ -74,7 +74,7 @@ var parser = CodeMirror.fromTextArea(document.getElementById("parser"), {
 });
 
 var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-	theme:"lesser-dark",
+	theme:"ambiance",
 	mode:"text/flexible",
 	lineNumbers: true,
 	onHighlightComplete:function() {
