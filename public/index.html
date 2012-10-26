@@ -96,8 +96,10 @@
     };
 
     var codeMirrors = [];
+    var didIntroduction = false;
 
     function showIntroduction () {
+      didIntroduction = true;
       $(".tab-content").append("<div id='introduction'><h1>Syntax Canvas</h1><h2>A tool for experiments in language design</h2></div>");
       $("#add-language").tooltip({trigger:'manual', title:'Click here to start your next language', placement:'left'});
       setTimeout(function() {$("#add-language").tooltip('show');}, 5000);
@@ -112,6 +114,8 @@
     }
 
     function addLanguage (name, code, syntax) {
+      $(".nav a").tooltip('destroy')
+
       var hash = name.hashCode();
 
       // create tab
@@ -129,6 +133,8 @@
       $(tab).find("a").dblclick(function (e) {
         e.preventDefault();
         var $this = $(this);
+
+        $(".nav a").tooltip('destroy')
 
         // create input element
         var controls =  $("<input style='width:" + $this.width() + "px' placeholder='" + name + "'></input><i class=\"icon-remove icon-black\"></i>");
@@ -246,6 +252,14 @@
       // insert tab and content into dom
       $(".nav").append(tab);
       $(".tab-content").append(tabPane);
+
+      if($(".nav a").size() == 1 && didIntroduction) {
+        setTimeout(function() {
+          $(".nav a:first").tooltip({trigger:'manual', title:'Double click to change the language\'s name or delete it.' , placement:'right'});
+          $(".nav a:first").tooltip('show')
+          setTimeout(function() { $(".nav a").tooltip('destroy')}, 8000);
+        }, 5000);
+      }
     }
 
 
