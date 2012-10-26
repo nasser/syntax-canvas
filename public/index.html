@@ -36,6 +36,11 @@
         top: -2px;
       }
 
+      .nav li.active i {
+        background-image: url("bootstrap/img/glyphicons-halflings.png") !important;
+        margin-left: 0.5em;
+      }
+
     </style>
     <script src="codemirror/lib/codemirror.js"></script>
     <script src="codemirror/mode/flexible/flexible.js"></script>
@@ -82,7 +87,9 @@
         var $this = $(this);
 
         // create input element
-        var input =  $("<input style='width:" + $this.width() + "px' placeholder='" + originalName + "'></input>");
+        var controls =  $("<input style='width:" + $this.width() + "px' placeholder='" + originalName + "'></input><i class=\"icon-remove icon-black\"></i>");
+        var input = controls.eq(0);
+        var remove = controls.eq(1);
 
         // no spaces, escape or enter with no text resets name, enter with text sets new name
         input.keydown(function(k) {
@@ -108,7 +115,22 @@
           }
         });
 
-        $this.html(input);
+        // losing focus resets name
+        input.blur(function () {
+          // must timeout, otherwise clicking the remove button is impossible
+          setTimeout(function() { $this.html(originalName); }, 100);
+        });
+
+        // remove button 
+        remove.click(function (e) {
+          tab.remove();
+          $("#tab-" + originalName).remove();
+          localStorage.removeItem(originalName);
+
+          $(".nav a:first").click();
+        });
+
+        $this.html(controls);
         input.focus();
       });
 
