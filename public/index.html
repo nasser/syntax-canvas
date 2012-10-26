@@ -21,6 +21,10 @@
         margin-top: 1px;
       }
 
+      .nav button {
+        margin-left: 5px;
+      }
+
     </style>
     <script src="codemirror/lib/codemirror.js"></script>
     <script src="codemirror/mode/flexible/flexible.js"></script>
@@ -33,7 +37,6 @@
     <script type="text/javascript">
 
     var codeMirrors = [];
-    var languages = [];
 
     function refreshEditors() {
       var tabHeight = $(window).outerHeight() - $(".nav").outerHeight(true);
@@ -44,22 +47,24 @@
     }
 
     function addLanguage (name, code, syntax) {
-      // add tab
-      var tab = $(".nav").prepend("<li><a href=\"#" + name + "\" data-toggle=\"tab\">" + name + "</a></li>");
+      var human_name = name;
+      name = name.replace(" ", "-");
+      // create tab
+      var tab = $("<li><a href=\"#tab-" + name + "\" data-toggle=\"tab\">" + human_name + "</a></li>");
 
       // make tab clickable
-      $("a", tab).click(function (e) {
+      $(tab).find("a").click(function (e) {
         e.preventDefault();
         $(this).tab('show');
 
         refreshEditors();
       });
 
-      // add tab content pane
-      var tab_pane = $(".tab-content").prepend("<div class=\"tab-pane\" id=\"" + name + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
+      // create tab content pane
+      var tab_pane = $("<div class=\"tab-pane\" id=\"tab-" + name + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
 
       // add syntax editor
-      var parser = CodeMirror.fromTextArea($(".parser textarea", tab_pane).get()[0], {
+      var parser = CodeMirror.fromTextArea($(tab_pane).find('.parser textarea').get(0), {
         theme:"ambiance",
         mode: "text/slymtax",
         smartIndent:false,
@@ -95,7 +100,7 @@
       parser.syntax = [];
 
       // add code editor
-      var editor = CodeMirror.fromTextArea($(".code textarea", tab_pane).get()[0], {
+      var editor = CodeMirror.fromTextArea($(tab_pane).find('.code textarea').get(0), {
         theme:"ambiance",
         mode: {
           name: "flexible",
@@ -104,8 +109,7 @@
         lineNumbers: true,
 
         onHighlightComplete:function() {
-          // localStorage.setItem("parserText", parser.getValue());
-          // localStorage.setItem("editorText", editor.getValue());
+          // localStorage.setItem(name, JSON.stringify({ code:editor.getValue(), syntax:parser.getValue() }));
         }
       });
 
@@ -119,6 +123,10 @@
       // store editors for future
       codeMirrors.push(parser);
       codeMirrors.push(editor);
+
+      // insert tab and content into dom
+      $(".nav").append(tab);
+      $(".tab-content").append(tab_pane);
     }
 
 
@@ -128,15 +136,20 @@
         refreshEditors();
       });
 
-      // if(!localStorage.getItem("languages"))
-        localStorage.setItem("languages", JSON.stringify([{name:'Quack', code:"foo = bar", syntax:"'foo':special"}]));
+      $("#add-language").click(function (e) {
+        addLanguage("New Language", "# Ramsey Nasser's Syntax Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
+      });
 
-      languages = JSON.parse(localStorage.getItem("languages"));
-      for (var i = languages.length - 1; i >= 0; i--) {
-        addLanguage(languages[i].name, languages[i].code, languages[i].syntax)
+      localStorage.clear();
+      localStorage.setItem("Quack", JSON.stringify({code:"foo = bar", syntax:"'foo':special"}));
+
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+
+        var name = localStorage.key(i);
+        var data = JSON.parse(localStorage.getItem(name));
+        if(data)
+          addLanguage(name, data.code, data.syntax)
       }
-
-      addLanguage("Demo", "# Ramsey Nasser's Language Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
 
       $(".nav a:first").click();
 
@@ -146,17 +159,6 @@
 </head>
 <body>
   <ul class="nav nav-tabs">
-    <!-- <li><a href="#tab1" data-toggle="tab">Quack</a></li>
-    <li class="active">
-      <a href="#tab2" data-toggle="tab">
-        <div class="input-append">
-        <input class="input-small" type="text" placeholder="Name"><button class="btn btn-success" type="button"><i class="icon-ok icon-white"></i></button>
-        </div>
-        Snipe
-      </a>
-    </li>
-    <li><a href="#tab3" data-toggle="tab">Zajal</a></li>
-     -->
     <li class="pull-right"><button id="add-language" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button></li>
   </ul>
   <div class="tab-content"></div>
