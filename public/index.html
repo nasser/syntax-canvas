@@ -34,6 +34,10 @@
 
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script src="bootstrap/js/bootstrap.js"></script>
+
+    <script src="http://github.com/downloads/dmajda/pegjs/peg-0.7.0.min.js"></script>
+    <script src="namegenerator.js"></script>
+    
     <script type="text/javascript">
 
     var codeMirrors = [];
@@ -137,7 +141,7 @@
       });
 
       $("#add-language").click(function (e) {
-        addLanguage("New Language", "# Ramsey Nasser's Syntax Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
+        addLanguage(NameGenerator.make_name("adjective%5 [animal name gem planet tree emotion letter] suffix%2"), "# Ramsey Nasser's Syntax Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
       });
 
       localStorage.clear();
