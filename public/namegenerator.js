@@ -12,7 +12,7 @@ var NameGenerator = (function() {
      white = ' '* { return '' } \
      ");
 
-  function compile_node (node, config) {
+  function compileNode (node, config) {
     if(Math.random() < node.chance) {
       if(node.category) {
         if(config[node.category]) {
@@ -26,12 +26,12 @@ var NameGenerator = (function() {
 
       } else if(node.expressions) {
         return node.expressions.map(function(e) {
-          return compile_node(e, config);
+          return compileNode(e, config);
         }).join("")
 
       } else if(node.options) {
         // TODO not the best implementation
-        return compile_node(node.options[Math.floor(Math.random() * node.options.length)], config);
+        return compileNode(node.options[Math.floor(Math.random() * node.options.length)], config);
 
       }
 
@@ -42,20 +42,20 @@ var NameGenerator = (function() {
   }
 
   var nameGenerator = {
-    make_name: function(pattern, config) {
-      if(!config) config=nameGenerator.default_config;
+    makeName: function(pattern, config) {
+      if(!config) config=nameGenerator.defaultConfig;
       var name = "";
       
       var ast = patternParser.parse(pattern);
       for (var i = 0; i < ast.length; i++) {
         var node = ast[i];
-        name += compile_node(node, config);
+        name += compileNode(node, config);
       };
 
       return name;
     },
 
-    default_config: {
+    defaultConfig: {
       year: function() { return Math.floor(Math.random() * 35 + 60).toString(); },
       suffix: ["!", "#", "*", "+", "++", "-", "--", "Talk", "Script"],
       adjective: ["Adorable", "Beautiful", "Clean", "Drab", "Elegant", "Fancy", "Glamorous", "Handsome", "Long", "Magnificent", "Old-fashioned", "Plain", "Quaint", "Sparkling", "Ugliest", "Unsightly", "Wide-eyed", "Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Gray", "Black", "White", "Alive", "Better", "Careful", "Clever", "Dead", "Easy", "Famous", "Gifted", "Helpful", "Important", "Inexpensive", "Mushy", "Odd", "Powerful", "Rich", "Shy", "Tender", "Uninterested", "Vast", "Wrong.", "Angry", "Bewildered", "Clumsy", "Defeated", "Embarrassed", "Fierce", "Grumpy", "Helpless", "Itchy", "Jealous", "Lazy", "Mysterious", "Nervous", "Obnoxious", "Panicky", "Repulsive", "Scary", "Thoughtless", "Uptight", "Worried", "Agreeable", "Brave", "Calm", "Delightful", "Eager", "Faithful", "Gentle", "Happy", "Jolly", "Kind", "Lively", "Nice", "Obedient", "Proud", "Relieved", "Silly", "Thankful", "Victorious", "Witty", "Zealous", "Broad", "Chubby", "Crooked", "Curved", "Deep", "Flat", "High", "Hollow", "Low", "Narrow", "Round", "Shallow", "Skinny", "Square", "Steep", "Straight", "Wide.", "Big", "Colossal", "Fat", "Gigantic", "Great", "Huge", "Immense", "Large", "Little", "Mammoth", "Massive", "Miniature", "Petite", "Puny", "Scrawny", "Short", "Small", "Tall", "Teeny", "Teeny", "Tiny", "Cooing", "Deafening", "Faint", "Hissing", "Loud", "Melodic", "Noisy", "Purring", "Quiet", "Raspy", "Screeching", "Thundering", "Voiceless", "Whispering", "Ancient", "Brief", "Early", "Fast", "Late", "Long", "Modern", "Old", "Old-fashioned", "Quick", "Rapid", "Short", "Slow", "Swift", "Young", "Bitter", "Delicious", "Fresh", "Greasy", "Juicy", "Hot", "Icy", "Loose", "Melted", "Nutritious", "Prickly", "Rainy", "Rotten", "Salty", "Sticky", "Strong", "Sweet", "Tart", "Tasteless", "Uneven", "Weak", "Wet", "Wooden", "Yummy", "Boiling", "Breeze", "Broken", "Bumpy", "Chilly", "Cold", "Cool", "Creepy", "Crooked", "Cuddly", "Curly", "Damaged", "Damp", "Dirty", "Dry", "Dusty", "Filthy", "Flaky", "Fluffy", "Freezing", "Hot", "Warm", "Wet", "Abundant", "Empty", "Few", "Full", "Heavy", "Light", "Many", "Numerous", "Sparse", "Substantial"],

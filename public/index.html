@@ -62,10 +62,10 @@
     }
 
     function addLanguage (name, code, syntax) {
-      var human_name = name;
+      var humanName = name;
       name = name.replace(" ", "-");
       // create tab
-      var tab = $("<li><a href=\"#tab-" + name + "\" data-toggle=\"tab\">" + human_name + "</a></li>");
+      var tab = $("<li><a href=\"#tab-" + name + "\" data-toggle=\"tab\">" + humanName + "</a></li>");
 
       // show tab on click
       $(tab).find("a").click(function (e) {
@@ -110,10 +110,10 @@
       });
 
       // create tab content pane
-      var tab_pane = $("<div class=\"tab-pane\" id=\"tab-" + name + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
+      var tabPane = $("<div class=\"tab-pane\" id=\"tab-" + name + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
 
       // add syntax editor
-      var parser = CodeMirror.fromTextArea($(tab_pane).find('.parser textarea').get(0), {
+      var parser = CodeMirror.fromTextArea($(tabPane).find('.parser textarea').get(0), {
         theme:"ambiance",
         mode: "text/slymtax",
         smartIndent:false,
@@ -149,7 +149,7 @@
       parser.syntax = [];
 
       // add code editor
-      var editor = CodeMirror.fromTextArea($(tab_pane).find('.code textarea').get(0), {
+      var editor = CodeMirror.fromTextArea($(tabPane).find('.code textarea').get(0), {
         theme:"ambiance",
         mode: {
           name: "flexible",
@@ -175,7 +175,7 @@
 
       // insert tab and content into dom
       $(".nav").append(tab);
-      $(".tab-content").append(tab_pane);
+      $(".tab-content").append(tabPane);
     }
 
 
@@ -186,7 +186,7 @@
       });
 
       $("#add-language").click(function (e) {
-        addLanguage(NameGenerator.make_name("adjective%5 [animal name gem planet tree emotion letter] suffix%2"), "# Ramsey Nasser's Syntax Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
+        addLanguage(NameGenerator.makeName("adjective%5 [animal name gem planet tree emotion letter] suffix%2"), "# Ramsey Nasser's Syntax Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
         $(".nav a:last").click();
       });
 
