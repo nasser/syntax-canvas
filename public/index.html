@@ -6,23 +6,21 @@
     <link rel="stylesheet" href="codemirror/theme/ambiance.css">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
     <style type="text/css">
-      html, body { height: 100%; }
-      body { margin: 1em; }
+      .nav {
+        margin-top: 1em;
+        margin-bottom: 5px;
+        padding: 0 1em;
+      }
+
+
       form {
-        height: 47%;
-        margin-bottom: 1em;
+        margin: 0;
       }
 
-      .code {
-        height: 100%;
+      .parser {
+        margin-top: 1px;
       }
 
-      .CodeMirror,
-      .CodeMirror-scroll {
-        height: 100%;
-      }
-      .CodeMirror {
-      }
     </style>
     <script src="codemirror/lib/codemirror.js"></script>
     <script src="codemirror/mode/flexible/flexible.js"></script>
@@ -33,22 +31,32 @@
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script src="bootstrap/js/bootstrap.js"></script>
     <script type="text/javascript">
+
+    var codeMirrors = [];
+
+    function refreshEditors() {
+      var tabHeight = $(window).outerHeight() - $(".nav").outerHeight(true);
+      $(".code .CodeMirror-scroll").height(tabHeight * 0.75);
+      $(".parser .CodeMirror-scroll").height(tabHeight * 0.25 - 1);
+
+      for (var i = codeMirrors.length - 1; i >= 0; i--) { codeMirrors[i].refresh(); };
+    }
+
+    $(function() {
+      $(window).resize(function() {
+        refreshEditors();
+      });
+
+      // make tabs clickable
       $('.nav a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
+
+        refreshEditors();
       });
-    </script>
-    <script type="text/javascript">
-    $(function() {
-      RegExp.prototype.toString = function() {
-        if(typeof this.source == 'undefined')
-          return "";
-        else
-          return this.source;
-      }
 
       $(".tab-pane").each(function(i, tab) {
-        var parser = CodeMirror.fromTextArea($(".parser", tab).get()[0], {
+        var parser = CodeMirror.fromTextArea($(".parser textarea", tab).get()[0], {
           theme:"ambiance",
           mode: "text/slymtax",
           smartIndent:false,
@@ -70,7 +78,6 @@
 
                 } else {
                   continue;
-
                 }
                 
                 if(typeof styles != "undefined" && typeof token != "undefined") Syntax.push([token, styles]);
@@ -84,9 +91,7 @@
         });
         parser.syntax = [];
 
-        console.log(parser);
-
-        var editor = CodeMirror.fromTextArea($(".code", tab).get()[0], {
+        var editor = CodeMirror.fromTextArea($(".code textarea", tab).get()[0], {
           theme:"ambiance",
           mode: {
             name: "flexible",
@@ -107,30 +112,43 @@
           parser.setValue("/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
 
           editor.setOption("mode", editor.getOption("mode")); // refresh editor
+
+          codeMirrors.push(parser);
+          codeMirrors.push(editor);
         });
 
+      refreshEditors();
     });
 </script>
 </head>
 <body>
   <ul class="nav nav-tabs">
     <li><a href="#tab1" data-toggle="tab">Quack</a></li>
-    <li class="active"><a href="#tab2" data-toggle="tab">Snipe</a></li>
+
+    <li class="active">
+      <a href="#tab2" data-toggle="tab">
+        <!-- <div class="input-append">
+        <input class="input-small" type="text" placeholder="Name"><button class="btn btn-success" type="button"><i class="icon-ok icon-white"></i></button>
+        </div> -->
+        Snipe
+      </a>
+    </li>
+
     <li><a href="#tab3" data-toggle="tab">Zajal</a></li>
-    <li class="pull-right"><button class="btn btn-primary"><i class="icon-plus icon-white"></i></button></li>
+    <li class="pull-right"><button class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button></li>
   </ul>
   <div class="tab-content">
     <div class="tab-pane" id="tab1">
-      <form><textarea class="code"></textarea></form>
-      <form><textarea class="parser a"></textarea></form>
+      <form class="code"><textarea></textarea></form>
+      <form class="parser"><textarea></textarea></form>
     </div>
     <div class="tab-pane active" id="tab2">
-      <form><textarea class="code"></textarea></form>
-      <form><textarea class="parser b"></textarea></form>
+      <form class="code"><textarea></textarea></form>
+      <form class="parser"><textarea></textarea></form>
     </div>
     <div class="tab-pane" id="tab3">
-      <form><textarea class="code"></textarea></form>
-      <form><textarea class="parser c"></textarea></form>
+      <form class="code"><textarea></textarea></form>
+      <form class="parser"><textarea></textarea></form>
     </div>
   </div>
 </body>
