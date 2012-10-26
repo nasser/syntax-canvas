@@ -1,8 +1,8 @@
-CodeMirror.defineMode("flexible", function(config) {
+CodeMirror.defineMode("flexible", function(config, mode) {
 	return {
 		startState: function() {
 			return {
-				syntax: Syntax,
+				parser: mode.parser,
 				multiTokens: []
 			};
 		},
@@ -36,9 +36,10 @@ CodeMirror.defineMode("flexible", function(config) {
 		// check each syntax rule for a match. if a multi token rule matches,
 		// populate state.multiTokens to match them on next iterations
 		matchSyntax: function(stream, state, ignore) {
-				for (var i = 0; i < state.syntax.length; i++) {
-				var token = state.syntax[i][0];
-				var styles = state.syntax[i][1].slice();
+				var syntax = state.parser.syntax;
+				for (var i = 0; i < syntax.length; i++) {
+				var token = syntax[i][0];
+				var styles = syntax[i][1].slice();
 
 				if(token == ignore)
 					continue;
