@@ -21,6 +21,10 @@
         margin-top: 1px;
       }
 
+      .nav {
+        min-height: 37px;
+      }
+
       .nav button {
         margin-left: 5px;
       }
@@ -39,6 +43,26 @@
       .nav li.active i {
         background-image: url("bootstrap/img/glyphicons-halflings.png") !important;
         margin-left: 0.5em;
+      }
+
+      #introduction h1 {
+        text-align: center;
+        font-size: 7em;
+        padding: 0.5em;
+
+        /* http://simurai.com/post/698681341/inset-text-shadow */
+        color: transparent;
+        background-color: rgba(82,96,117,0.5);
+        -webkit-background-clip: text;
+        text-shadow: rgba(255,255,255,0.5) 0 5px 6px;
+      }
+
+      #introduction h2 {
+        text-align: center;
+      }
+
+      #introduction p {
+        text-align: center;
       }
 
     </style>
@@ -68,6 +92,12 @@
     };
 
     var codeMirrors = [];
+
+    function showIntroduction () {
+      $(".tab-content").append("<div id='introduction'><h1>Syntax Canvas</h1><h2>A tool for experiments in language design</h2></div>");
+      $("#add-language").tooltip({trigger:'manual', title:'Click here to start your next language', placement:'left'});
+      setTimeout(function() {$("#add-language").tooltip('show');}, 5000);
+    }
 
     function refreshEditors() {
       var tabHeight = $(window).outerHeight() - $(".nav").outerHeight(true);
@@ -134,7 +164,11 @@
           $("#tab-" + hash).remove();
           localStorage.removeItem(name);
 
-          $(".nav a:first").click();
+          if($(".nav a").size() == 0) {
+              showIntroduction();
+          } else {
+            $(".nav a:first").click();
+          }
         });
 
         $this.html(controls);
@@ -218,7 +252,13 @@
       });
 
       $("#add-language").click(function (e) {
-        addLanguage(NameGenerator.makeName("adjective%5 [animal name gem planet tree emotion letter] suffix%2"), "# Ramsey Nasser's Syntax Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
+        $("#introduction").remove();
+        $("#add-language").tooltip('destroy');
+
+        addLanguage(
+          NameGenerator.makeName("adjective%5 [animal name gem planet tree emotion letter] suffix%2"),
+          "# Type your code here, and your syntax in the lower pane\n# \n# The syntax pane's syntax is MATCH : STYLE+\n# \n# MATCH is a single quoted string ('foo'), a simple\n# regex (/--.*/), or a regex with captures (/(\w+)=(\d+)/)\n# \n# STYLE is an unquoted style name, indicating\n# how to style the text. Available styles are: keyword, atom,\n# number, def, variable, variable-2 variable-3, property,\n# operator, comment, string, string-2 meta, error, qualifier,\n# builtin, bracket, tag, attribute header, quote, hr, link\n\nself.range = (10...32)\n",
+          "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
         $(".nav a:last").click();
       });
 
@@ -229,8 +269,11 @@
           addLanguage(name, data.code, data.syntax)
       }
 
-      $(".nav a:first").click();
+      if($(".nav a").size() == 0) {
+        showIntroduction();
+      }
 
+      $(".nav a:first").click();
       refreshEditors();
     });
 </script>
