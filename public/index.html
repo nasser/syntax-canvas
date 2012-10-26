@@ -25,6 +25,17 @@
         margin-left: 5px;
       }
 
+      .nav input:focus {
+        outline: none;
+      }
+      .nav input {
+        border: none;
+        padding: 0;
+        height: 18px;
+        position: relative;
+        top: -2px;
+      }
+
     </style>
     <script src="codemirror/lib/codemirror.js"></script>
     <script src="codemirror/mode/flexible/flexible.js"></script>
@@ -56,12 +67,46 @@
       // create tab
       var tab = $("<li><a href=\"#tab-" + name + "\" data-toggle=\"tab\">" + human_name + "</a></li>");
 
-      // make tab clickable
+      // show tab on click
       $(tab).find("a").click(function (e) {
         e.preventDefault();
         $(this).tab('show');
 
         refreshEditors();
+      });
+
+      // edit language name on double click
+      $(tab).find("a").dblclick(function (e) {
+        e.preventDefault();
+        var originalName = $(this).text();
+        var $this = $(this);
+
+        // create input element
+        var input =  $("<input style='width:" + $this.width() + "px' placeholder='" + originalName + "'></input>");
+
+        // escape or enter with no text resets name, enter with text sets new name
+        input.keydown(function(k) {
+          var code = k.keyCode || k.which;
+          if(code == 27) { // escape
+            k.preventDefault();
+            $this.html(originalName);
+
+          } else if(code == 13) { // enter
+            k.preventDefault();
+            if(input.val() == "") {
+              $this.html(originalName);
+
+            } else {
+              var newName = input.val();
+              $this.html(newName);
+              localStorage.setItem(newName, localStorage.getItem(originalName));
+              localStorage.removeItem(originalName);
+            }
+          }
+        });
+
+        $this.html(input);
+        input.focus();
       });
 
       // create tab content pane
@@ -113,7 +158,7 @@
         lineNumbers: true,
 
         onHighlightComplete:function() {
-          // localStorage.setItem(name, JSON.stringify({ code:editor.getValue(), syntax:parser.getValue() }));
+          localStorage.setItem(name, JSON.stringify({ code:editor.getValue(), syntax:parser.getValue() }));
         }
       });
 
@@ -145,12 +190,8 @@
         $(".nav a:last").click();
       });
 
-      localStorage.clear();
-      localStorage.setItem("Quack", JSON.stringify({code:"foo = bar", syntax:"'foo':special"}));
-
       for (var i = localStorage.length - 1; i >= 0; i--) {
-
-        var name = localStorage.key(i);
+          var name = localStorage.key(i);
         var data = JSON.parse(localStorage.getItem(name));
         if(data)
           addLanguage(name, data.code, data.syntax)
