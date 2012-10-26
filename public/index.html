@@ -56,6 +56,17 @@
     
     <script type="text/javascript">
 
+    String.prototype.hashCode = function(){
+      var hash = 0, i, char;
+      if (this.length == 0) return hash;
+      for (i = 0; i < this.length; i++) {
+          char = this.charCodeAt(i);
+          hash = ((hash<<5)-hash)+char;
+          hash = hash & hash; // Convert to 32bit integer
+      }
+      return hash;
+    };
+
     var codeMirrors = [];
 
     function refreshEditors() {
@@ -67,10 +78,10 @@
     }
 
     function addLanguage (name, code, syntax) {
-      var humanName = name;
-      name = name.replace(" ", "-");
+      var hash = name.hashCode();
+
       // create tab
-      var tab = $("<li><a href=\"#tab-" + name + "\" data-toggle=\"tab\">" + humanName + "</a></li>");
+      var tab = $("<li><a href=\"#tab-" + hash + "\" data-toggle=\"tab\">" + name + "</a></li>");
 
       // show tab on click
       $(tab).find("a").click(function (e) {
@@ -83,34 +94,30 @@
       // edit language name on double click
       $(tab).find("a").dblclick(function (e) {
         e.preventDefault();
-        var originalName = $(this).text();
         var $this = $(this);
 
         // create input element
-        var controls =  $("<input style='width:" + $this.width() + "px' placeholder='" + originalName + "'></input><i class=\"icon-remove icon-black\"></i>");
+        var controls =  $("<input style='width:" + $this.width() + "px' placeholder='" + name + "'></input><i class=\"icon-remove icon-black\"></i>");
         var input = controls.eq(0);
         var remove = controls.eq(1);
 
-        // no spaces, escape or enter with no text resets name, enter with text sets new name
+        // escape or enter with no text resets name, enter with text sets new name
         input.keydown(function(k) {
           var code = k.keyCode || k.which;
-          if(code == 32) { // spaces
+          if(code == 27) { // escape
             k.preventDefault();
-
-          } else if(code == 27) { // escape
-            k.preventDefault();
-            $this.html(originalName);
+            $this.html(name);
 
           } else if(code == 13) { // enter
             k.preventDefault();
             if(input.val() == "") {
-              $this.html(originalName);
+              $this.html(name);
 
             } else {
               var newName = input.val();
               $this.html(newName);
-              localStorage.setItem(newName, localStorage.getItem(originalName));
-              localStorage.removeItem(originalName);
+              localStorage.setItem(newName, localStorage.getItem(name));
+              localStorage.removeItem(name);
             }
           }
         });
@@ -118,14 +125,14 @@
         // losing focus resets name
         input.blur(function () {
           // must timeout, otherwise clicking the remove button is impossible
-          setTimeout(function() { $this.html(originalName); }, 100);
+          setTimeout(function() { $this.html(name); }, 100);
         });
 
         // remove button 
         remove.click(function (e) {
           tab.remove();
-          $("#tab-" + originalName).remove();
-          localStorage.removeItem(originalName);
+          $("#tab-" + hash).remove();
+          localStorage.removeItem(name);
 
           $(".nav a:first").click();
         });
@@ -135,7 +142,7 @@
       });
 
       // create tab content pane
-      var tabPane = $("<div class=\"tab-pane\" id=\"tab-" + name + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
+      var tabPane = $("<div class=\"tab-pane\" id=\"tab-" + hash + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
 
       // add syntax editor
       var parser = CodeMirror.fromTextArea($(tabPane).find('.parser textarea').get(0), {
