@@ -33,6 +33,7 @@
     <script type="text/javascript">
 
     var codeMirrors = [];
+    var languages = [];
 
     function refreshEditors() {
       var tabHeight = $(window).outerHeight() - $(".nav").outerHeight(true);
@@ -42,80 +43,102 @@
       for (var i = codeMirrors.length - 1; i >= 0; i--) { codeMirrors[i].refresh(); };
     }
 
-    $(function() {
-      $(window).resize(function() {
-        refreshEditors();
-      });
+    function addLanguage (name, code, syntax) {
+      // add tab
+      var tab = $(".nav").prepend("<li><a href=\"#" + name + "\" data-toggle=\"tab\">" + name + "</a></li>");
 
-      // make tabs clickable
-      $('.nav a').click(function (e) {
+      // make tab clickable
+      $("a", tab).click(function (e) {
         e.preventDefault();
         $(this).tab('show');
 
         refreshEditors();
       });
 
-      $(".tab-pane").each(function(i, tab) {
-        var parser = CodeMirror.fromTextArea($(".parser textarea", tab).get()[0], {
-          theme:"ambiance",
-          mode: "text/slymtax",
-          smartIndent:false,
-          onChange:function() {
-            var Syntax = [];
-            var syntaxLines = parser.getValue().split("\n");
-            for (var i = syntaxLines.length - 1; i >= 0; i--) {
-              try {
-                var matches, token, styles;
-                if(matches = /\/([^\/]+)\/\s*:\s*(.+)/.exec(syntaxLines[i])) {
-                  // regexp rule
-                  token = new RegExp("^" + matches[1].trim().replace(/ /g, "")); // whitespace replace, bad idea?
-                  styles = matches[2].trim().split(" ");
-                  
-                } else if(matches = /'([^']+)'\s*:\s*(.+)/.exec(syntaxLines[i])) {
-                  // string rule
-                  token = matches[1].trim();
-                  styles = matches[2].trim().split(" ");
+      // add tab content pane
+      var tab_pane = $(".tab-content").prepend("<div class=\"tab-pane\" id=\"" + name + "\"> <form class=\"code\"><textarea></textarea></form> <form class=\"parser\"><textarea></textarea></form> </div>");
 
-                } else {
-                  continue;
-                }
+      // add syntax editor
+      var parser = CodeMirror.fromTextArea($(".parser textarea", tab_pane).get()[0], {
+        theme:"ambiance",
+        mode: "text/slymtax",
+        smartIndent:false,
+        onChange:function() {
+          var Syntax = [];
+          var syntaxLines = parser.getValue().split("\n");
+          for (var i = syntaxLines.length - 1; i >= 0; i--) {
+            try {
+              var matches, token, styles;
+              if(matches = /\/([^\/]+)\/\s*:\s*(.+)/.exec(syntaxLines[i])) {
+                // regexp rule
+                token = new RegExp("^" + matches[1].trim().replace(/ /g, "")); // whitespace replace, bad idea?
+                styles = matches[2].trim().split(" ");
                 
-                if(typeof styles != "undefined" && typeof token != "undefined") Syntax.push([token, styles]);
+              } else if(matches = /'([^']+)'\s*:\s*(.+)/.exec(syntaxLines[i])) {
+                // string rule
+                token = matches[1].trim();
+                styles = matches[2].trim().split(" ");
 
-              } catch(e) {}
-            }
+              } else {
+                continue;
+              }
+              
+              if(typeof styles != "undefined" && typeof token != "undefined") Syntax.push([token, styles]);
 
-            parser.syntax = Syntax;
-            editor.setOption("mode", editor.getOption("mode")) // refresh editor
+            } catch(e) {}
           }
-        });
-        parser.syntax = [];
 
-        var editor = CodeMirror.fromTextArea($(".code textarea", tab).get()[0], {
-          theme:"ambiance",
-          mode: {
-            name: "flexible",
-            parser: parser
-          },
-          lineNumbers: true,
-          onHighlightComplete:function() {
-            localStorage.setItem("parserText", parser.getValue());
-            localStorage.setItem("editorText", editor.getValue());
-          }
-        });
+          parser.syntax = Syntax;
+          editor.setOption("mode", editor.getOption("mode")) // refresh editor
+        }
+      });
+      parser.syntax = [];
+
+      // add code editor
+      var editor = CodeMirror.fromTextArea($(".code textarea", tab_pane).get()[0], {
+        theme:"ambiance",
+        mode: {
+          name: "flexible",
+          parser: parser
+        },
+        lineNumbers: true,
+
+        onHighlightComplete:function() {
+          // localStorage.setItem("parserText", parser.getValue());
+          // localStorage.setItem("editorText", editor.getValue());
+        }
+      });
+
+      // populate editors
+      editor.setValue(code);
+      parser.setValue(syntax);
+
+      // refresh editor
+      editor.setOption("mode", editor.getOption("mode")); 
+
+      // store editors for future
+      codeMirrors.push(parser);
+      codeMirrors.push(editor);
+    }
 
 
-        // editor.setValue(localStorage.getItem("editorText"));
-        // parser.setValue(localStorage.getItem("parserText"));
 
-          editor.setValue("# Ramsey Nasser's Language Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)");
-          parser.setValue("/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
+    $(function() {
+      $(window).resize(function() {
+        refreshEditors();
+      });
 
-          editor.setOption("mode", editor.getOption("mode")); // refresh editor
+      // if(!localStorage.getItem("languages"))
+        localStorage.setItem("languages", JSON.stringify([{name:'Quack', code:"foo = bar", syntax:"'foo':special"}]));
 
-          codeMirrors.push(parser);
-          codeMirrors.push(editor);
-        });
+      languages = JSON.parse(localStorage.getItem("languages"));
+      for (var i = languages.length - 1; i >= 0; i--) {
+        addLanguage(languages[i].name, languages[i].code, languages[i].syntax)
+      }
+
+      addLanguage("Demo", "# Ramsey Nasser's Language Canvas\n# \n# type your code here, and your syntax in the lower pane\n# syntax syntax is MATCH : STYLE, STYLE... where MATCH is\n# a single quoted string, a simple regex or a regex with\n# captures and STYLE is an unquoted style name, indicating\n# how to style the text. Custom styling coming soon. \n# \n# styles are: keyword, atom, number, def, variable, variable-2\n# variable-3, property, operator, comment, string, string-2\n# meta, error, qualifier, builtin, bracket, tag, attribute\n# header, quote, hr, link  \n\nself.range = (10...32)", "/\\((\\d+)(...)(\\d+)\\)/ : number operator number\n/#.*/ : comment\n'self' : builtin")
+
+      $(".nav a:first").click();
 
       refreshEditors();
     });
@@ -123,33 +146,19 @@
 </head>
 <body>
   <ul class="nav nav-tabs">
-    <li><a href="#tab1" data-toggle="tab">Quack</a></li>
-
+    <!-- <li><a href="#tab1" data-toggle="tab">Quack</a></li>
     <li class="active">
       <a href="#tab2" data-toggle="tab">
-        <!-- <div class="input-append">
+        <div class="input-append">
         <input class="input-small" type="text" placeholder="Name"><button class="btn btn-success" type="button"><i class="icon-ok icon-white"></i></button>
-        </div> -->
+        </div>
         Snipe
       </a>
     </li>
-
     <li><a href="#tab3" data-toggle="tab">Zajal</a></li>
-    <li class="pull-right"><button class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button></li>
+     -->
+    <li class="pull-right"><button id="add-language" class="btn btn-small btn-primary"><i class="icon-plus icon-white"></i></button></li>
   </ul>
-  <div class="tab-content">
-    <div class="tab-pane" id="tab1">
-      <form class="code"><textarea></textarea></form>
-      <form class="parser"><textarea></textarea></form>
-    </div>
-    <div class="tab-pane active" id="tab2">
-      <form class="code"><textarea></textarea></form>
-      <form class="parser"><textarea></textarea></form>
-    </div>
-    <div class="tab-pane" id="tab3">
-      <form class="code"><textarea></textarea></form>
-      <form class="parser"><textarea></textarea></form>
-    </div>
-  </div>
+  <div class="tab-content"></div>
 </body>
 </html>
