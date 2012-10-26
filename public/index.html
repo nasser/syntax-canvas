@@ -84,10 +84,13 @@
         // create input element
         var input =  $("<input style='width:" + $this.width() + "px' placeholder='" + originalName + "'></input>");
 
-        // escape or enter with no text resets name, enter with text sets new name
+        // no spaces, escape or enter with no text resets name, enter with text sets new name
         input.keydown(function(k) {
           var code = k.keyCode || k.which;
-          if(code == 27) { // escape
+          if(code == 32) { // spaces
+            k.preventDefault();
+
+          } else if(code == 27) { // escape
             k.preventDefault();
             $this.html(originalName);
 
